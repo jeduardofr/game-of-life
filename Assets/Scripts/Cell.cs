@@ -34,7 +34,44 @@ public class Cell : MonoBehaviour
 
     private void OnMouseDown()
     {
-        m_IsAlive = !m_IsAlive;
+        SetIsAlive(!m_IsAlive);
+    }
+
+    public Vector2 GetCoords()
+    {
+        return new Vector2(gameObject.transform.localPosition.x, gameObject.transform.localPosition.y);
+    }
+
+    public void SetIsAlive(bool isAlive)
+    {
+        m_IsAlive = isAlive;
         m_Material.color = m_IsAlive ? m_OnEnterColor : m_OnExitColor;
+    }
+
+    public void SetWillBeAlive(bool willBeAlive)
+    {
+        m_WillBeAlive = willBeAlive;
+    }
+
+    public bool GetIsAlive()
+    {
+        return m_IsAlive;
+    }
+
+    public bool ApplyChanges()
+    {
+        bool changed = m_WillBeAlive != m_IsAlive;
+
+        if (m_WillBeAlive)
+        {
+            SetIsAlive(true);
+            m_WillBeAlive = false;
+        }
+        else
+        {
+            SetIsAlive(false);
+        }
+
+        return changed;
     }
 }

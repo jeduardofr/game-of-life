@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 enum PlayingState
 {
     ComputeChanges = 0,
     ApplyChanges = 1,
-    CheckIfLoss = 2
+    Lose = 2,
+    Win = 3
 }
 
 public class GameOfLifeRuntime : MonoBehaviour
@@ -18,19 +19,26 @@ public class GameOfLifeRuntime : MonoBehaviour
     private int m_Width;
     private int m_Height;
     private int m_Generations;
+
+    private int m_RuntimeGenerations;
     private PlayingState m_State;
     private Dictionary<Vector2, Cell> m_Cells;
     private TMP_InputField m_GenerationInputField;
     private TMP_InputField m_GridWidthInputField;
     private TMP_InputField m_GridHeightInputField;
+    private TMP_Text m_ResultsText;
 
     [SerializeField] private GameObject m_ParametersPanel;
+    [SerializeField] private GameObject m_ResultsPanel;
 
     [SerializeField] private Cell m_CellPrefab;
 
     [SerializeField] private Transform m_Player;
 
     [SerializeField] private GameObject m_StartSimulation;
+    [SerializeField] private GameObject m_StopSimulation;
+    [SerializeField] private GameObject m_RestartSimulation;
+    [SerializeField] private GameObject m_BackButton;
 
     private void Start()
     {
@@ -44,8 +52,13 @@ public class GameOfLifeRuntime : MonoBehaviour
         
         m_GridHeightInputField = m_ParametersPanel.transform.GetChild(5).GetComponent<TMP_InputField>();
         m_GridHeightInputField.onValueChanged.AddListener(delegate { OnGridHeightInputFieldChange(); });
+
+        m_ResultsText = m_ResultsPanel.GetComponentInChildren<TMP_Text>();
         
         m_StartSimulation.GetComponent<Button>().onClick.AddListener(delegate { OnStartRuntime(); });
+        m_StopSimulation.GetComponent<Button>().onClick.AddListener(delegate { OnStopRuntime(); });
+        m_RestartSimulation.GetComponent<Button>().onClick.AddListener(delegate { OnRestartRuntime(); });
+        m_BackButton.GetComponent<Button>().onClick.AddListener(delegate { OnBack(); });
 
         m_State = PlayingState.ComputeChanges;
     }
@@ -86,11 +99,13 @@ public class GameOfLifeRuntime : MonoBehaviour
         m_Player.transform.localPosition = new Vector3(halfX, halfY, 0);
     }
 
+    public void OnBack()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+
     public void StartGeneration()
     {
-        m_Width = 80;
-        m_Height = 80;
-
         GenerateGrid();
 
         m_ParametersPanel.SetActive(false);
@@ -100,34 +115,130 @@ public class GameOfLifeRuntime : MonoBehaviour
     public void OnStartRuntime()
     {
         m_Playing = true;
+        m_RuntimeGenerations = 0;
 
-        var text = m_StartSimulation.GetComponentInChildren<TMP_Text>();
-        text.text = "Detener";
+        m_StartSimulation.SetActive(false);
+        m_StopSimulation.SetActive(true);
     }
 
-    public void StopRuntime()
+    public void OnRestartRuntime()
+    {
+        m_Playing = false;
+        m_State = PlayingState.ComputeChanges;
+        m_RuntimeGenerations = 0;
+        
+        m_ResultsPanel.SetActive(false);
+        m_ParametersPanel.SetActive(true);
+
+        foreach (var cell in m_Cells)
+        {
+            Debug.Log($"Removing comp at {cell.Key.x},{cell.Key.y}");
+            Destroy(cell.Value.gameObject);
+        }
+        m_Cells.Clear();
+    }
+
+    public void OnStopRuntime()
     {
         m_Playing = false;
         
-        var text = m_StartSimulation.GetComponentInChildren<TMP_Text>();
-        text.text = "Reanudar";
+        m_StartSimulation.SetActive(true);
+        m_StopSimulation.SetActive(false);
     }
 
     private void FixedUpdate()
     {
         if (m_Playing)
         {
-            Debug.Log("Start executing algorithm");
-
             switch (m_State)
             {
-                case PlayingState.ApplyChanges:
-                    break;
                 case PlayingState.ComputeChanges:
-                    break;
-                case PlayingState.CheckIfLoss:
+                {
+                    foreach (KeyValuePair<Vector2, Cell> entry in m_Cells)
+                    {
+                        var coords = entry.Value.GetCoords();
+                        var vec2List = GetListOfCloseNeighboords((int)coords.x, (int)coords.y);
+                        var neighboords = new List<Cell>();
+                        foreach (Vector2 vec in vec2List)
+                        {
+                            neighboords.Add(m_Cells[vec]);
+                        }
+
+                        var actived = neighboords.FindAll(n => n.GetIsAlive());
+                        if (!entry.Value.GetIsAlive() && actived.Count == 3)
+                        {
+                            entry.Value.SetWillBeAlive(true);
+                        }
+
+                        if (entry.Value.GetIsAlive() && (actived.Count == 2 || actived.Count == 3))
+                        {
+                            entry.Value.SetWillBeAlive(true);
+                        }
+
+                        m_State = PlayingState.ApplyChanges;
+                    }
+                } break;
+                case PlayingState.ApplyChanges:
+                {
+                    bool changed = false;
+                    foreach (KeyValuePair<Vector2, Cell> entry in m_Cells)
+                    {
+                        if (entry.Value.ApplyChanges())
+                        {
+                            changed = true;
+                        }
+                    }
+
+                    m_RuntimeGenerations += 1;
+                    if (!changed)
+                    {
+                        m_State = PlayingState.Lose;
+                    } else if (m_RuntimeGenerations == m_Generations)
+                    {
+                        m_State = PlayingState.Win;
+                    }
+                    else
+                    {
+                        m_State = PlayingState.ComputeChanges;
+                    }
+                } break;
+                case PlayingState.Lose:
+                case PlayingState.Win:
+                    m_ResultsText.text = m_State == PlayingState.Win ? "Has ganado!" : "Has perdido!";
+                    m_ResultsText.color = m_State == PlayingState.Win
+                        ? new Color(0.1843f, 0.7490f, 0.4431f, 1f)
+                        : new Color(0.9372f, 0.1764f, 0.3372f, 1f);
+                    m_ResultsPanel.SetActive(true);
+                    m_StartSimulation.SetActive(false);
+                    m_StopSimulation.SetActive(false);
                     break;
             }
         }
+    }
+    
+    private List<Vector2> GetListOfCloseNeighboords(int x, int y)
+    {
+        List<Vector2> list = new List<Vector2>();
+
+        // Upper left corner
+        { var v = new Vector2(x - 1, y - 1); if (m_Cells.ContainsKey(v)) list.Add(v); }
+        // Upper
+        { var v = new Vector2(x, y - 1); if (m_Cells.ContainsKey(v)) list.Add(v); }
+        // Upper right corner
+        { var v = new Vector2(x + 1, y - 1); if (m_Cells.ContainsKey(v)) list.Add(v); }
+        
+        // Left
+        { var v = new Vector2(x - 1, y); if (m_Cells.ContainsKey(v)) list.Add(v); }
+        // Right
+        { var v = new Vector2(x + 1, y); if (m_Cells.ContainsKey(v)) list.Add(v); }
+
+        // Upper left corner
+        { var v = new Vector2(x - 1, y + 1); if (m_Cells.ContainsKey(v)) list.Add(v); }
+        // Upper
+        { var v = new Vector2(x, y + 1); if (m_Cells.ContainsKey(v)) list.Add(v); }
+        // Upper right corner
+        { var v = new Vector2(x + 1, y + 1); if (m_Cells.ContainsKey(v)) list.Add(v); }
+        
+        return list;
     }
 }

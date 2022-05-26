@@ -4,11 +4,11 @@ Game of Life built using Unity
 
 ## Goals
 
-- [ ] A way to win
-- [ ] A way to lose
-- [ ] 1 movement
-- [ ] 1 animation
-- [ ] 1 collision or trigger
+- [x] A way to win
+- [x] A way to lose
+- [x] 1 movement
+- [x] 1 animation
+- [x] 1 collision or trigger
 - [x] UI Elements (Main Menu)
 - [ ] Colectionables, poderes o modificadores
 - [ ] NPC's or Instruction page
