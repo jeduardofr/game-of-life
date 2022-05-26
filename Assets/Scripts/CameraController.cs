@@ -42,7 +42,7 @@ public class CameraController : MonoBehaviour
  		m_PlayerCamera.SetParent(m_FocusPoint);
  
  		// Assign position & rotation
- 		m_FocusPoint.localPosition = new Vector3(0, m_CameraHeight, -2);
+ 		m_FocusPoint.localPosition = new Vector3(0, m_CameraHeight, 0);
  		m_FocusPoint.localRotation = Quaternion.Euler(0, 0, 0);
  		m_FocusPoint.localScale = new Vector3(1, 1, 1);
  
@@ -68,5 +68,7 @@ public class CameraController : MonoBehaviour
 			m_Player.localRotation = Quaternion.Euler(0, m_CamRotX, 0);
 			m_PlayerCamera.LookAt(m_Player);
 		}
+
+		m_PlayerCamera.localRotation = Quaternion.identity;
     }
 }
