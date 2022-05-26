@@ -661,7 +661,7 @@ MonoBehaviour:
   m_Player: {fileID: 982025790}
   m_PlayerCamera: {fileID: 2096100725}
   m_FocusPoint: {fileID: 1917768427}
-  m_Zoom: -20
+  m_Zoom: -5
   m_ZoomSpeed: 3
   m_ZoomMax: -0.5
   m_ZoomMin: -30

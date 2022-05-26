@@ -10,7 +10,7 @@ public class CellManager : MonoBehaviour
     [SerializeField] private Cell m_CellPrefab;
 
     [SerializeField] private Transform m_Player;
-    
+
     void Start()
     {
         GenerateGrid();
