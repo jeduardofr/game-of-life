@@ -14,3 +14,11 @@ Game of Life built using Unity
 - [ ] NPC's or Instruction page
 - [x] Change of scene
 
+
+## Colors
+
+Main Green: (47, 191, 113)
+Secondary Green: (140, 216, 103)
+Red: (239, 45, 86)
+Orange: (237, 125, 58)
+Gray: (33, 39, 56)
