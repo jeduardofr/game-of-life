@@ -1,19 +1,15 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
-
-enum UIState
-{
-    Initial,
-    OpenMenu,
-}
+using UnityEngine.UI;
 
 enum PlayingState
 {
-    Update,
-    ComputeChanges,
-    ApplyChanges
+    ComputeChanges = 0,
+    ApplyChanges = 1,
+    CheckIfLoss = 2
 }
 
 public class GameOfLifeRuntime : MonoBehaviour
@@ -22,6 +18,7 @@ public class GameOfLifeRuntime : MonoBehaviour
     private int m_Width;
     private int m_Height;
     private int m_Generations;
+    private PlayingState m_State;
     private Dictionary<Vector2, Cell> m_Cells;
     private TMP_InputField m_GenerationInputField;
     private TMP_InputField m_GridWidthInputField;
@@ -32,6 +29,8 @@ public class GameOfLifeRuntime : MonoBehaviour
     [SerializeField] private Cell m_CellPrefab;
 
     [SerializeField] private Transform m_Player;
+
+    [SerializeField] private GameObject m_StartSimulation;
 
     private void Start()
     {
@@ -45,6 +44,10 @@ public class GameOfLifeRuntime : MonoBehaviour
         
         m_GridHeightInputField = m_ParametersPanel.transform.GetChild(5).GetComponent<TMP_InputField>();
         m_GridHeightInputField.onValueChanged.AddListener(delegate { OnGridHeightInputFieldChange(); });
+        
+        m_StartSimulation.GetComponent<Button>().onClick.AddListener(delegate { OnStartRuntime(); });
+
+        m_State = PlayingState.ComputeChanges;
     }
 
     private void OnGenerationInputFieldChange()
@@ -91,15 +94,40 @@ public class GameOfLifeRuntime : MonoBehaviour
         GenerateGrid();
 
         m_ParametersPanel.SetActive(false);
+        m_StartSimulation.SetActive(true);
     }
 
-    public void StartRuntime()
+    public void OnStartRuntime()
     {
         m_Playing = true;
+
+        var text = m_StartSimulation.GetComponentInChildren<TMP_Text>();
+        text.text = "Detener";
     }
 
     public void StopRuntime()
     {
         m_Playing = false;
+        
+        var text = m_StartSimulation.GetComponentInChildren<TMP_Text>();
+        text.text = "Reanudar";
+    }
+
+    private void FixedUpdate()
+    {
+        if (m_Playing)
+        {
+            Debug.Log("Start executing algorithm");
+
+            switch (m_State)
+            {
+                case PlayingState.ApplyChanges:
+                    break;
+                case PlayingState.ComputeChanges:
+                    break;
+                case PlayingState.CheckIfLoss:
+                    break;
+            }
+        }
     }
 }
