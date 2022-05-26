@@ -8,8 +8,7 @@ public class CellManager : MonoBehaviour
     [SerializeField] private int m_Width, m_Height;
 
     [SerializeField] private Cell m_CellPrefab;
-
-    [SerializeField] private Transform m_Camera;
+    
     void Start()
     {
         GenerateGrid();
@@ -25,7 +24,5 @@ public class CellManager : MonoBehaviour
                 spawnedCell.name = $"Tile {x} {y}";
             }
         }
-
-        // m_Camera.transform.position = new Vector3((float)m_Width / 2 - 0.5f, (float)m_Width / 2 - 0.5f, 10);
     }
 }
