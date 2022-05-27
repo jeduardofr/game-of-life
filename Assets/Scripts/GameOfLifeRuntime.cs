@@ -88,7 +88,7 @@ public class GameOfLifeRuntime : MonoBehaviour
             {
                 var spawnedCell = Instantiate(m_CellPrefab, new Vector3(x, y), Quaternion.identity);
                 spawnedCell.transform.localScale = new Vector3(0.96f, 0.96f, 0.96f);
-                spawnedCell.name = $"Tile {x} {y}";
+                spawnedCell.name = $"Cell {x} {y}";
 
                 m_Cells[new Vector2(x, y)] = spawnedCell;
             }
@@ -132,7 +132,6 @@ public class GameOfLifeRuntime : MonoBehaviour
 
         foreach (var cell in m_Cells)
         {
-            Debug.Log($"Removing comp at {cell.Key.x},{cell.Key.y}");
             Destroy(cell.Value.gameObject);
         }
         m_Cells.Clear();
