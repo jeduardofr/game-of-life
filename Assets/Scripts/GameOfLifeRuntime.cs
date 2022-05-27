@@ -27,9 +27,11 @@ public class GameOfLifeRuntime : MonoBehaviour
     private TMP_InputField m_GridWidthInputField;
     private TMP_InputField m_GridHeightInputField;
     private TMP_Text m_ResultsText;
+    private TMP_Text m_GenerationsText;
 
     [SerializeField] private GameObject m_ParametersPanel;
     [SerializeField] private GameObject m_ResultsPanel;
+    [SerializeField] private GameObject m_GenerationsTextPro;
 
     [SerializeField] private Cell m_CellPrefab;
 
@@ -54,6 +56,7 @@ public class GameOfLifeRuntime : MonoBehaviour
         m_GridHeightInputField.onValueChanged.AddListener(delegate { OnGridHeightInputFieldChange(); });
 
         m_ResultsText = m_ResultsPanel.GetComponentInChildren<TMP_Text>();
+        m_GenerationsText = m_GenerationsTextPro.GetComponent<TMP_Text>();
         
         m_StartSimulation.GetComponent<Button>().onClick.AddListener(delegate { OnStartRuntime(); });
         m_StopSimulation.GetComponent<Button>().onClick.AddListener(delegate { OnStopRuntime(); });
@@ -110,6 +113,7 @@ public class GameOfLifeRuntime : MonoBehaviour
 
         m_ParametersPanel.SetActive(false);
         m_StartSimulation.SetActive(true);
+        m_GenerationsTextPro.SetActive(true);
     }
 
     public void OnStartRuntime()
@@ -126,9 +130,11 @@ public class GameOfLifeRuntime : MonoBehaviour
         m_Playing = false;
         m_State = PlayingState.ComputeChanges;
         m_RuntimeGenerations = 0;
+        m_GenerationsText.text = "Gen: 0";
         
         m_ResultsPanel.SetActive(false);
         m_ParametersPanel.SetActive(true);
+        m_GenerationsTextPro.SetActive(false);
 
         foreach (var cell in m_Cells)
         {
@@ -189,6 +195,7 @@ public class GameOfLifeRuntime : MonoBehaviour
                     }
 
                     m_RuntimeGenerations += 1;
+                    m_GenerationsText.text = $"Gen: {m_RuntimeGenerations}";
                     if (!changed)
                     {
                         m_State = PlayingState.Lose;
